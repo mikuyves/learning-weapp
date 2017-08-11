@@ -33,6 +33,15 @@ prod = prod.toJSON()
 console.log(prod.name)  // "Sample name"
 ```
 
+### JSON 与 AV.Object 数据转换
+```javascript
+let jsonObject = AV.Object.toFullJSON()  // 把 Object 的数据完整转化到 JSON。主要是 _className 属性。
+let avObject = AV.ParseJSON(jsonObject)  //
+
+AV.Object.toFullJSON 和 AV.ParseJSON 两个方法互逆。 
+
+```
+
 ### 获取 Pointer 的属性值。
 Query 不能获取 Pointer 的属性，只能获取其 objectId。要获取更多信息，需要用 `include`
 ```javascript
@@ -164,4 +173,52 @@ function mapPointerRelation(pointers, relations) {
     return p
   })
 }
+```
+
+### 查询后，数据重新组合。
+```javascript
+  /**
+   * Leancloud AV.Object 通用方法。以每一行数据的某个 pointer 为中心把数据重新组合。
+   * 可用于 pointer 数据反查，中间表查询后排列。
+   * @param  {[Array]} list          进行重组的数据。
+   * @param  {[String]} key          pointer 在数据表中的名字。
+   * @param  {[String]} subListName  组合后的子数组的名字。
+   * @return {[Array]}               返回的数组格式为: [
+   *                                   key: pointer <AV.Object>
+   *                                   subListName: subList <Array>
+   *                                 ]
+   */
+  static groupByPointer(list, key, subListName) {
+    let ids = list.map(item => {
+      if (item[key].objectId) {
+        return item[key].objectId;
+      };
+    });
+    ids = [...new Set(ids)];
+    let newList = [];
+    for (let id of ids) {
+      let pointer = list.find(item => item[key].objectId == id)[key];
+      let subList = list.filter(item => item[key].objectId === id);
+      let obj = {};
+      obj[key] = pointer;
+      obj[subListName] = subList;
+      newList = [...newList, obj];
+
+    }
+    return newList;
+
+  }
+```
+
+
+### 查询 - 判断 pointer 相等
+注意，必须要用 createWithoutData, 尤其是 _User 类别，会找不到，因为 session 会不同。
+使用了 createWithoutData，Leancloud 只需判断 objectId 是否相等，不会理会其他属性。
+```javascript
+let sku = AV.Object.createWithoutData('Sku', m.sku.objectId);
+let res = await new AV.Query('SCart')
+  .equalTo('handler', new AV.Object.createWithoutData('_User', handler.toJSON().objectId))
+  .equalTo('customer', new AV.Object.createWithoutData('_User', customer.objectId))
+  .equalTo('sku', sku)  
+  .first()
 ```
