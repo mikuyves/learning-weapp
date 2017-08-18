@@ -29,6 +29,8 @@ wepy 提供方便的 api。带参数跳转更方便。
   - # wepy 重要提示: 
   微信开发者工具-->项目-->关闭代码压缩上传 重要：开启后，会导致真机computed, props.sync 等等属性失效。#270[https://github.com/wepyjs/wepy/issues/270]
 
+  更新： 1.5.8 版，似乎可以开始压缩选项。
+
   - coolhwm 修复了不能真机不能显示弹框选择器的问题。
 
 ### 页面跳转
@@ -37,6 +39,9 @@ wepy 提供方便的 api。带参数跳转更方便。
 // 即时只穿一个参数，也建议 用结构的方式放在对象中。
 this.$root.$navigate('relativeUrl', {goodsId});
 ```
+
+### 注意问题：
+`wx.switchTab`  --> `this.$switch`
 
 
 
@@ -175,7 +180,7 @@ TypeError: Cannot read property 'orderGoodsInfos' of undefined
 wepy 改进了传参方式，可以传 _对象_ 等。传多个参数也更方便。
 ```html
 <!-- 模板
-传多个参数，需要用 `,` 分格开两个 `{{xxx}}` 的参数。
+传多个参数，需要用 `,` 分格开多个 `{{xxx}}` 的参数。
  -->
  <view @tap="detail({{prod.prodKey.objectId}}, {{prod.skuList}})">
   <!-- ... -->
@@ -201,6 +206,41 @@ methods = {
     this.$root.$navigate('../../pages/goods/prod', {goodsId, skuList, e});
   }
 }
+```
+注意： 模板参数只能传字符串。或者 Array?
+
+### Watcher VS Computer
+ 可以用 async 函数，但是效果不同。
+ 如果用在 computed 里面，会产生一个对象：
+```
+customer    {4}
+    _state  : 1
+    _handled  :   false
+    _value  : null
+    _deferreds  : null
+```
+且始终不能设置此值为 null 或者 空。因此如果有对这个值做逻辑判断，需要小心。
+问题是，总是不能设置正确的值，永远等于上面的值。
+另外，computed 比 watch 进行 setData 的次数多很多。
+暂时未研究。
+
+### 1.5.8 bug
+ISSUE#303
+本地修改路径 `cd /usr/local/lib/node_modules/wepy-cli/lib/compile.js`
+
+```github
+                 cStyle.compile('less', opath);
+                  break;
+              case '.sass':
+ -            case '.scss':
+                  cStyle.compile('sass', opath);
+                  break;
+ +            case '.scss':
+ +                cStyle.compile('scss', opath);
+ +                break;
+              case '.js':
+                  cScript.compile('babel', null, 'js', opath);
+                  break;
 ```
 
 

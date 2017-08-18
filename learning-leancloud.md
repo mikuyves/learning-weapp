@@ -222,3 +222,41 @@ let res = await new AV.Query('SCart')
   .equalTo('sku', sku)  
   .first()
 ```
+
+### 内嵌查询
+[https://leancloud.cn/docs/leanstorage_guide-js.html#内嵌查询]
+```
+  // 构建内嵌查询
+  var innerQuery = new AV.Query('TodoFolder');
+  innerQuery.greaterThan('likes', 20);
+
+  // 将内嵌查询赋予目标查询
+  var query = new AV.Query('Comment');
+
+  // 执行内嵌操作
+  query.matchesQuery('targetTodoFolder', innerQuery);
+  query.find().then(function (results) {
+     // results 就是符合超过 20 个赞的 TodoFolder 这一条件的 Comment 对象集合
+  }, function (error) {
+  });
+
+  query.doesNotMatchQuery('targetTodoFolder', innerQuery);
+  // 如此做将查询出 likes 小于或者等于 20 的 TodoFolder 的 Comment 对象
+```
+
+### AV.Promise.all
+* 批量删除  `AV.Object.detroyAll(objectList)`
+* 批量保存  `AV.Object.saveAll(objectList)`
+* 批量获取  `AV.Object.fetchAll(objectList)`
+* 多个 promise 一起请求 `AV.Promise.all(promiseList)`
+```javascript
+AV.Promise.all([
+  AV.Object.destroyAll(pics),
+  prod.destroy(),
+  AV.Object.destroyAll(skus)
+])
+```
+
+
+## 源码
+@since 2017-08-13

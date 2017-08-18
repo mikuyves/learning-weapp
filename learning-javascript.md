@@ -75,6 +75,14 @@ return pointers.map(p => {
 const stock = goods.goodsStocks.find(item => item.sku === sku).stock;
 ```
 
+#### every()
+数组中，执行函数的结果全部为真，才返回真。
+```javascript
+isAllSoldOut() {
+return this.skuList.map(item => item.isSoldOut).every((v) => v)
+}
+```
+
 ### 数据类型
 
 #### 注意：返回值是 true/false
@@ -91,4 +99,13 @@ new Map() ?  true : false
 #### bind()、apply() 和 call()
 ```javascript
 
+```
+
+
+### 拆解数组。
+将一个含有子数组的数组，变成一个字含有基本元素的数组。
+```javascript
+static flatten(arr) {
+return [].concat(...arr)
+}
 ```
